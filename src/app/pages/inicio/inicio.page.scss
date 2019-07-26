@@ -1,0 +1,16 @@
+.ion-1x { font-size: 14px !important;} 
+.ion-2x { font-size: 10px !important;}
+.centrar_content {
+    .fixed-content,
+    .scroll-content {
+        display: flex;
+        align-items: center;
+
+        ion-list {
+            max-width: 300px; 
+            width:100%; 
+            margin: auto; 
+            text-align: center;
+        }
+    }
+} 
