@@ -11,7 +11,7 @@
     </ion-datetime>
   </ion-item>
   <ion-item>
-    <ion-label>Establecimiento</ion-label>
+    <ion-label class="ion-1x">Establecimiento</ion-label>
     <ion-select  [(ngModel)]="idEstablecimiento" (ngModelChange)="SelectEstablecimiento($event)" class="ion-1x">
       <ion-select-option class="ion-1x" *ngFor=" let locales of establecimientos" [value]=locales.CODALMACEN>
         <ion-label class="ion-2x"> {{locales.NOMBREALMACEN}}</ion-label>
