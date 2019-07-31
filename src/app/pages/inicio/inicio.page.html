@@ -18,6 +18,9 @@
       </ion-select-option>
     </ion-select>
   </ion-item>
+  <ion-button expand="block" color="primary" (click)="BtnClickCargar()">
+    Cargar
+  </ion-button>
   <ion-item>
       <ion-label>Tipo Articulos</ion-label>
       <ion-select [(ngModel)]="idSeccion" (ngModelChange)="SelectSeccion($event)" class="ion-1x">
@@ -26,10 +29,6 @@
         </ion-select-option>
       </ion-select>
   </ion-item>
-  <ion-button expand="block" color="primary" (click)="BtnClickCargar()">
-    Cargar
-  </ion-button>
-  <ion-content>
     <ion-grid class="ion-2x">
       <ion-row style="border-bottom: 0.5px solid gray;">
         <ion-col size="7">Descripcion</ion-col>
@@ -57,5 +56,7 @@
         </ion-col>
       </ion-row>
     </ion-grid>
-  </ion-content>
+    <ion-button expand="block" color="primary" (click)="BtnClickCargar()">
+      Adicionar PT
+    </ion-button>
 </ion-content>

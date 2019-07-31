@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { SQLite, SQLiteObject } from '@ionic-native/sqlite/ngx';
-import { Platform } from '@ionic/angular';
+import { Platform, LoadingController } from '@ionic/angular';
 import { SQLitePorter } from '@ionic-native/sqlite-porter/ngx';
 import { resolve } from 'url';
 import { reject } from 'q';
 import { JsonpClientBackend } from '@angular/common/http';
+import { async } from '@angular/core/testing';
 
 @Injectable({
   providedIn: "root"
@@ -25,9 +26,10 @@ export class DatabaseService {
   constructor(
     public _PLAT: Platform,
     private _SQL: SQLite,
-    private _PORTER: SQLitePorter
+    private _PORTER: SQLitePorter,
+    public Loading: LoadingController,
   ) {
-    this.init();
+    //this.init();
   }
 
   /**
@@ -109,7 +111,8 @@ export class DatabaseService {
   }
 
   CreateTableStock() {
-    let sql =
+    return new Promise((resolve, reject) => {
+      let sql =
       "CREATE TABLE IF NOT EXISTS STOCKS(CODARTICULO INTEGER NOT NULL,TALLA TEXT NOT NULL,COLOR TEXT NOT NULL,CODALMACEN TEXT NOT NULL,";
     sql =
       sql +
@@ -117,18 +120,18 @@ export class DatabaseService {
     sql =
       sql +
       " MINIMO REAL NULL,FECHAMODIFICADO TEXT NULL,MAXIMO REAL NULL,UBICACION TEXT NULL)";
-    this._DB
-      .executeSql(sql, [])
-      .then(response => {
-        console.log("Creacion de Tabla Stock : " + JSON.stringify(response));
-        return Promise.resolve(response);
-      })
-      .catch(error => {
-        console.log(
-          "Error al crear la tabla STOCKS : " + JSON.stringify(error)
-        );
-        Promise.reject(error);
-      });
+      setTimeout(() => {
+        this._DB
+        .executeSql(sql, [])
+        .then(response => {
+          console.log('Creando la tabla STOCK : ' + JSON.stringify(response));
+          resolve({value: true, values: response});
+        })
+        .catch(error => {
+          reject({ value: false, values: error});
+        });
+      }, 4000);
+    });
   }
 
   InsertStock(obj: any) {
@@ -166,25 +169,51 @@ export class DatabaseService {
   }
 
   CreateTableArticulos() {
-    let sql =
+    return new Promise((resolve, reject) => {
+      let sql =
+      "CREATE TABLE IF NOT EXISTS ARTICULOS (CODARTICULO	INTEGER NOT NULL,REFERENCIA	TEXT DEFAULT NULL,DESCRIPCION ";
+      sql =
+        sql +
+        "TEXT DEFAULT NULL, SECCION	INTEGER,UNIDADES	REAL,ESKIT	TEXT,UNIDADMEDIDA	TEXT,UDSELABORACION	REAL, ";
+      sql =
+        sql +
+        "ULTIMOCOSTE	REAL, USASTOCKS	TEXT,DESCATALOGADO	TEXT,PRIMARY KEY(CODARTICULO))"; 
+      setTimeout(() => {
+        this._DB
+        .executeSql(sql, [])
+        .then(response => {
+          console.log('Creando la tabla ARTICULOS : ' + JSON.stringify(response));
+          resolve({value: true, values: response});
+        })
+        .catch(error => {
+          reject({ value: false, values: error});
+        });
+      }, 4000);
+    });
+    /*
+     let sql =
       "CREATE TABLE IF NOT EXISTS ARTICULOS (CODARTICULO	INTEGER NOT NULL,REFERENCIA	TEXT DEFAULT NULL,DESCRIPCION ";
     sql =
       sql +
       "TEXT DEFAULT NULL, SECCION	INTEGER,UNIDADES	REAL,ESKIT	TEXT,UNIDADMEDIDA	TEXT,UDSELABORACION	REAL, ";
     sql =
       sql +
-      "ULTIMOCOSTE	REAL, USASTOCKS	TEXT,DESCATALOGADO	TEXT,PRIMARY KEY(CODARTICULO))";
-    this._DB
+      "ULTIMOCOSTE	REAL, USASTOCKS	TEXT,DESCATALOGADO	TEXT,PRIMARY KEY(CODARTICULO))"; 
+    setTimeout(() => {
+      this._DB
       .executeSql(sql, [])
       .then(response => {
+        console.log('Creando la tabla ARTICULOS : ' + JSON.stringify(response));
         return Promise.resolve(response);
       })
       .catch(error => {
         Promise.reject(error);
       });
+    }, 4000);
+    */
   }
 
-  InsertArticulos(obj: any) {
+   async InsertArticulos(obj: any) {
     obj.forEach(a => {
       let sql =
         "INSERT INTO ARTICULOS (CODARTICULO, REFERENCIA, DESCRIPCION, SECCION, UNIDADES, ESKIT, UNIDADMEDIDA, ";
@@ -206,7 +235,6 @@ export class DatabaseService {
           a.DESCATALOGADO
         ])
         .then(response => {
-          //console.log('Response INSERT ARTICULOS : ' + JSON.stringify(response));
           return Promise.resolve(response);
         })
         .catch(error => {
@@ -216,6 +244,23 @@ export class DatabaseService {
   }
 
   CreateTableKits() {
+    return new Promise((resolve, reject) => {
+      let sql ="CREATE TABLE IF NOT EXISTS KITS (CODARTICULO INTEGER,CODARTKIT INTEGER,DESCRIPCIOKIT TEXT,LINEAKIT INTEGER,";
+    sql = sql + " PRECIOUNIDAD REAL,REFERENCIA TEXT,REFERENCIAKIT TEXT,TOTALLINEA	REAL,UNIDADES REAL)";
+      setTimeout(() => {
+        this._DB
+        .executeSql(sql, [])
+        .then(response => {
+          console.log('Creando la tabla KITS : ' + JSON.stringify(response));
+          resolve({value: true, values: response});
+        })
+        .catch(error => {
+          reject({ value: false, values: error});
+        });
+      }, 4000);
+    });
+
+/*
     let sql =
       "CREATE TABLE IF NOT EXISTS KITS (CODARTICULO INTEGER,CODARTKIT INTEGER,DESCRIPCIOKIT TEXT,LINEAKIT INTEGER,";
     sql =
@@ -229,6 +274,7 @@ export class DatabaseService {
       .catch(error => {
         Promise.reject(error);
       });
+      */
   }
 
   InsertKits(obj: any) {
@@ -260,16 +306,21 @@ export class DatabaseService {
   }
 
   CreateTableSecciones() {
-    let sql =
+    return new Promise((resolve, reject) => {
+      let sql =
       "CREATE TABLE IF NOT EXISTS SECCIONES (SECCION INTEGER NOT NULL, DESCRIPCION	TEXT, DPTO INTEGER)";
-    this._DB
-      .executeSql(sql, [])
-      .then(response => {
-        return Promise.resolve(response);
-      })
-      .catch(error => {
-        Promise.reject(error);
-      });
+      setTimeout(() => {
+        this._DB
+        .executeSql(sql, [])
+        .then(response => {
+          console.log('Creando la tabla SECCIONES : ' + JSON.stringify(response));
+          resolve({value: true, values: response});
+        })
+        .catch(error => {
+          reject({ value: false, values: error});
+        });
+      }, 4000);
+    });
   }
 
   InsertSecciones(obj: any) {
@@ -330,14 +381,6 @@ export class DatabaseService {
       .catch(error => Promise.reject(error));
   }
 
-  CheckTables() {
-    this.CheckTableExist('ARTICULOS').then((data) => {
-      console.log('TABLA CREADA ARTICULO : ' + JSON.stringify(data));
-    }).catch((error) => {
-      console.log('Error Check Table ARTICULO : ' + JSON.stringify(error));
-    });
-  }
-
   GetDataScript(name: string) {
     return this._DB
       .executeSql(name, [])
@@ -360,29 +403,118 @@ export class DatabaseService {
       let sql = "SELECT count(*) AS CONT FROM " + name;
       console.log(sql);
       this._DB
-        .executeSql(sql)
+        .executeSql(sql, [])
         .then((data: any) => {
-          console.log("DATA CHECK TABLE : " + data);
+          console.log("DATA CHECK TABLE : " + JSON.stringify(data));
           let numRows = data.rows.item(0).CONT;
-          resolve(numRows);
+          resolve({value: true, values: numRows});
         })
         .catch(e => {
           console.log(JSON.stringify(e));
-          reject(e);
+          reject({value: false});
         });
     });
   }
 
-  TablesDeletes() {
-    console.log('Eliminando desde Database Services');
-    this.DeleteTables('ARTICULOS');
-    this.DeleteTables('KITS');
-    this.DeleteTables('SECCIONES');
-    this.DeleteTables('STOCKS');
+  CreateTables() {
+    const q = ({ARTICULOS: false, KITS: false, SECCIONES: false, STOCKS: false});
+    return new Promise(async (resolve, reject ) =>{
+      const loading = await this.Loading.create({
+        message: 'Cargando Datos ... ',
+        spinner: 'circles',
+      });
+      loading.present().then(() => {
+        this.CreateTableArticulos().then(() => {
+          console.log('CREATE TABLE ARTICULOS');
+        }).catch(() => {
+          console.log('ARTICULOS NO CREADA');
+        });
+        this.CreateTableKits();
+        this.CreateTableSecciones();
+        this.CreateTableStock();
+      });
+      setTimeout(() => {
+          loading.dismiss().then((data) => {
+            resolve(data);
+          })
+          .catch((error) => {
+            reject(error);
+          });
+        }, 6000);
+    });
   }
 
-  init(): void {
-    this._SQL
+  CrearTablas() {
+    const q = ({ARTICULOS: false, KITS: false, SECCIONES: false, STOCKS: false});
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        this.CheckTableExist('ARTICULOS').then((data: any) => {
+          console.log('EXISTE LA TABLA ARTICULOS : ' + JSON.stringify(data.value));
+          if ( data.value === false) {
+            this.CreateTableArticulos();
+            q.ARTICULOS = true;
+          }
+        });
+      }, 4000);
+      this.CheckTableExist('KITS').then((data: any) => {
+        console.log('EXISTE LA TABLA KITS : ' + JSON.stringify(data.value));
+        if ( data.value === false) {
+          this.CreateTableKits();
+          q.KITS = true;
+        }
+      });
+      this.CheckTableExist('SECCIONES').then((data: any) => {
+        console.log('EXISTE LA TABLA SECCIONES : ' + JSON.stringify(data.value));
+        if ( data.value === false) {
+          this.CreateTableSecciones();
+          q.SECCIONES = true;
+        }
+      });
+      this.CheckTableExist('STOCKS').then((data: any) => {
+        console.log('EXISTE LA TABLA STOCKS : ' + JSON.stringify(data.value));
+        if ( data.value === false) {
+          this.CreateTableStock();
+          q.STOCKS = true;
+        }
+      });
+      resolve({values : q});
+    });
+  }
+
+  TablesDeletes() {
+    return new Promise((resolve, reject) => {
+      console.log('Eliminando desde Database Services');
+      this.CheckTableExist('ARTICULOS').then((data: any) => {
+        console.log('VALOR DE CHECK TABLE ARTICULO : ' + JSON.stringify(data));
+        if ( data.values > 0) {
+          this.DeleteTables('ARTICULOS');
+        }
+      });
+      this.CheckTableExist('KITS').then((data: any) => {
+        console.log('VALOR DE CHECK TABLE ARTICULO : ' + JSON.stringify(data));
+        if ( data.values > 0) {
+          this.DeleteTables('KITS');
+        }
+      });
+      this.CheckTableExist('SECCIONES').then((data: any) => {
+        console.log('VALOR DE CHECK TABLE ARTICULO : ' + JSON.stringify(data));
+        if ( data.values > 0) {
+          this.DeleteTables('SECCIONES');
+        }
+      });
+      this.CheckTableExist('STOCKS').then((data: any) => {
+        console.log('VALOR DE CHECK TABLE ARTICULO : ' + JSON.stringify(data));
+        if ( data.values > 0) {
+          this.DeleteTables('STOCKS');
+        }
+      });
+      resolve({value: true});
+    });
+  }
+
+  init() {
+    return new Promise((resolve, reject) => {
+      this._SQL
       .create({
         name: this._DB_NAME,
         location: 'default'
@@ -392,12 +524,72 @@ export class DatabaseService {
         console.log(db);
         console.log('DATABASE open : ' + db);
         this._DB = db;
-        //this.CheckTables();
-        this.TablesDeletes();
+        /*this.CreateTables().then(() => {
+          this.TablesDeletes();
+        });*/
+        setTimeout(() => {
+          // ARTICULOS
+          this.CheckTableExist('ARTICULOS').then((data: any) => {
+            console.log('EXISTE LA TABLA ARTICULOS : ' + JSON.stringify(data.value));
+            if ( data.value === true) {
+              this.DeleteTables('ARTICULOS').then(() => {
+                console.log('DELETE TABLE ARTICULOS');
+              });
+            }
+          }).catch(() => {
+            this.CreateTableArticulos().then((data2: any) => {
+              console.log('TABLA ARTICULOS CREADA');
+            });
+          });
+          // KITS
+          this.CheckTableExist('KITS').then((data: any) => {
+            console.log('EXISTE LA TABLA KITS : ' + JSON.stringify(data.value));
+            if ( data.value === true) {
+              this.DeleteTables('KITS').then((data2: any) => {
+                console.log('DELETE TABLE KITS');
+              });
+            }
+          }).catch(() => {
+            this.CreateTableKits().then(() => {
+              console.log('TABLA KITS CREADA');
+            });
+          });
+          // SECCIONES
+          this.CheckTableExist('SECCIONES').then((data: any) => {
+            console.log('EXISTE LA TABLA SECCIONES : ' + JSON.stringify(data.value));
+            if ( data.value === true) {
+              this.DeleteTables('SECCIONES').then((data2: any) => {
+                console.log('DELETE TABLE SECCIONES');
+              });
+            }
+          }).catch(() => {
+            this.CreateTableSecciones().then(() => {
+              console.log('TABLA SECCIONES CREADA');
+            });
+          });
+          // STOCK
+          this.CheckTableExist('STOCKS').then((data: any) => {
+            console.log('EXISTE LA TABLA STOCKS : ' + JSON.stringify(data.value));
+            if ( data.value === true) {
+              this.DeleteTables('STOCKS').then((data2: any) => {
+                console.log('DELETE TABLE STOCKS');
+              });
+            }
+          }).catch(() => {
+            this.CreateTableStock().then(() => {
+              console.log('TABLA STOCKS CREADA');
+            });
+          });
+
+        }, 500);
+        console.log('Saliendo de INIT()');
+        resolve({value: true});
       })
       .catch(e => {
         console.log(e);
+        reject({value: false});
       });
+    });
   }
 
   /**
@@ -443,7 +635,7 @@ export class DatabaseService {
         });
     });
   }
-  
+
   /**
    *
    * @param jsonObj Objeto que se desea saber sus keys

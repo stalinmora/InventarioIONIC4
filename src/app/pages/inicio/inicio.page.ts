@@ -12,6 +12,8 @@ import { load } from '@angular/core/src/render3';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { AlertasService } from '../../providers/alertas/alertas.service';
 import { async } from '@angular/core/testing';
+import { DatePipe } from '@angular/common';
+import { jsonpCallbackContext } from '@angular/common/http/src/module';
 
 
 
@@ -52,31 +54,40 @@ export class InicioPage implements OnInit {
     public sql: SqlService,
     public nav: NavController,
     public Loading: LoadingController,
-    public alertas: AlertasService
+    public alertas: AlertasService,
+    public datepipe: DatePipe
     ) {
       this.myGroup = new FormGroup({
         datetime: new FormControl('', [Validators.required]),
       });
-      this.CargarDatos().then(() => {
-        if (this.articulos3 === undefined) {
-          this.getRegularizacion();
-        }
-      });
+      setTimeout(() => {
+        this.databaseService.init().then((data: any) => {
+          console.log('Retorno de INIT() : ' + JSON.stringify(data.value));
+          this.CargarDatos().then(() => {
+            console.log('data cargada');
+          });
+        });
+      }, 4000);
   }
 
   getRegularizacion() {
     return new Promise((resolve, reject) => {
       if (this.articulos3 === undefined) {
-        this.storage.get('REGULARIZACION').then((data) => {
-          const t = JSON.parse(data);
-          this.articulos3 = t.regularizacion;
-          this.todosArticulos = t.regularizacion;
-          const idFilter = this.idSeccion;
-          console.log('DATA CARGADA CORRECTAMENTE ');
-          this.articulos3 = this.todosArticulos.filter(function (n) {
-            return n.SECCION === idFilter;
+        setTimeout(() => {
+          this.storage.get('REGULARIZACION').then((data) => {
+            const t = JSON.parse(data);
+            this.articulos3 = t.regularizacion;
+            this.todosArticulos = t.regularizacion;
+            const idFilter = this.idSeccion;
+            console.log('DATA CARGADA CORRECTAMENTE ');
+            this.articulos3 = this.todosArticulos.filter(function (n) {
+              return n.SECCION === idFilter;
+            });
+            resolve({value: true, values: data});
+          }).catch((error) => {
+            reject({value: false, values: error});
           });
-        });
+        }, 5000);
       }
     });
   }
@@ -105,47 +116,10 @@ export class InicioPage implements OnInit {
         .catch((error) => {
           reject(error);
         });
-      }, this.timeoutTime + 5000);
+      }, this.timeoutTime + 7000);
     });
   }
 
-  async getArticulos() {
-    const loading = await this.Loading.create({
-      message: 'Cargando datos ... ',
-      spinner: 'crescent',
-    });
-    loading.present().then(() => {
-      this.sql.getArticulosInventario(3)
-      .then((data) => {
-        this.articulos3 = data;
-        console.log('DATA DE REGULARIZACION :' + JSON.stringify(data));
-        this.todosArticulos = data;
-        console.log('VALOR DE IDSECCION : ' + this.idSeccion);
-        const idFilter = this.idSeccion;
-        console.log('DATA CARGADA CORRECTAMENTE ');
-        this.articulos3 = this.todosArticulos.filter(function (n) {
-          return n.SECCION === idFilter;
-        });
-      })
-      .catch((error) => {
-        console.log('ERROR getArticulosInventario Articulos 3 : ' + JSON.stringify(error));
-      });
-      loading.dismiss();
-    });
-  }
-/*
-  async showLoading(){
-    const loading = await this.Loading.create({
-        message: 'Cargando Datos...',
-        spinner: 'circles'
-    });
-    loading.present();
-
-    setTimeout(() => {
-        loading.dismiss();
-    }, this.timeoutTime);
-  }
-*/
   ngOnInit() {
     //this.getArticulos();
   }
@@ -154,39 +128,29 @@ export class InicioPage implements OnInit {
     console.log(this.txtFecha);
   }
 
-  InsertTablas() {
-    return new Promise((resolve, reject) => {
-      console.log('INSERTANDO DATOS EN SQLITE');
-      this.databaseService.InsertArticulos(this.todosArticulos2);
-      this.databaseService.InsertStock(this.stocks);
-      this.databaseService.InsertSecciones(this.secciones);
-      this.databaseService.InsertKits(this.kits);
-      console.log('TERMINADO SQLLITE');
-      resolve(1);
-    });
-  }
 
   async InsertaTablas() {
     return new Promise(async (resolve, reject) =>{
       const loading = await this.Loading.create({
         message: 'Insertando Datos en Tablas ... ',
-        spinner: 'circles',
+        spinner: 'crescent',
       });
-      loading.present().then(() => {
+      loading.present().then(async () => {
         console.log('INSERTANDO DATOS EN SQLITE');
-        this.databaseService.InsertArticulos(this.todosArticulos2);
-        this.databaseService.InsertStock(this.stocks);
-        this.databaseService.InsertSecciones(this.secciones);
-        this.databaseService.InsertKits(this.kits);
+        await this.databaseService.InsertArticulos(this.todosArticulos2);
+        await this.databaseService.InsertStock(this.stocks);
+        await this.databaseService.InsertSecciones(this.secciones);
+        await this.databaseService.InsertKits(this.kits);
         console.log('TERMINADO SQLLITE');
         setTimeout(() => {
           loading.dismiss().then((data) => {
+            console.log('INSERT COMPLETE');
             resolve(data);
           })
           .catch((error) => {
             reject(error);
           });
-        }, this.timeoutTime + 5000);
+        }, this.timeoutTime + 10000);
       });
     });
   }
@@ -199,7 +163,7 @@ export class InicioPage implements OnInit {
       });
       loading.present().then(() => {
         console.log('Cargar Datos');
-        this.storage.get('USER').then((val) => {
+        this.storage.get('USER').then(async (val) => {
           const t = JSON.parse(val);
           this.todosArticulos2 = t.articulos;
           this.establecimientos = t.almacenes;
@@ -207,9 +171,10 @@ export class InicioPage implements OnInit {
           this.stocks = t.stocks;
           this.secciones = t.secciones;
           this.idSeccion = this.secciones[0].SECCION;
-          this.InsertaTablas().then((data) => {
+          console.log('DATA CARGADA DE CargarDatos() : ' + JSON.stringify(this.secciones));
+          await this.InsertaTablas().then((data) => {
             console.log('Valor de respuesta de Inserta Tablas :' + JSON.stringify(data));
-            this.getArticulosAll();
+            //this.getArticulosAll();
           });
         });
         setTimeout(() => {
@@ -219,23 +184,53 @@ export class InicioPage implements OnInit {
           .catch((error) => {
             reject(error);
           });
-        }, this.timeoutTime + 5000);
+        }, this.timeoutTime + 10000);
+      });
+    });
+  }
+
+  VerificaRegularizacion() {
+    return new Promise((resolve, reject) => {
+      this.storage.get('REGULARIZACION').then((data) => {
+        const t = JSON.parse(data);
+        const articulos3 = t.regularizacion;
+        console.log('DATA t Articulos 3 : ' + articulos3 );
+        if (articulos3 != undefined || articulos3 != null) {
+          resolve({value: true});
+        } else {
+          reject({value: false });
+        }
       });
     });
   }
 
   BtnClickCargar() {
-    //this.alertas.show('PRUEBA DESDE CLICK');
-    if (this.txtFecha === null || this.txtFecha === undefined) {
-      this.alertas.show('Debe Ingresar Fecha Valida');
+    if (this.articulos3 === undefined) {
+      console.log('EXISTE DATA EN BTNCLICKCARGAR()');
+      this.alertas.show('Ya se encuntra una data');
+    } else {
+      if (this.txtFecha === null || this.txtFecha === undefined) {
+        this.alertas.show('Por favor debe ingresar una fecha. ');
+      } else if (this.idEstablecimiento === null || this.idEstablecimiento === undefined) {
+        this.alertas.show('Debe escoger un establecimiento valido');
+      } else {
+        this.VerificaRegularizacion().then((data: any) => {
+            console.log('EXISTE DATA en REGULARIZACION :' + data.value);
+            this.getRegularizacion();
+          }).catch((error) => {
+            console.log('Existe data : ' + error);
+            this.txtFecha = this.datepipe.transform(this.txtFecha, 'yyyyMMdd');
+            console.log('Fecha es : ' + this.txtFecha);
+            this.sql.getRegularizacion(this.idEstablecimiento, this.txtFecha).then((data) => {
+            console.log('DATA BTN CARGAR : ' + JSON.stringify(data));
+            this.datalocal.SetDataRegularizacion(data).then(() => {
+              console.log('Data extraida correctamente');
+              this.getRegularizacion();
+            });
+          });
+        });
+      }
     }
-    /*
-    this.storage.remove('REGULARIZACION').then((data) => {
-      console.log('Datos del Remove : ' + JSON.parse(data));
-    }).catch((error) => {
-      console.log('Error del remove : ' + error);
-    });
-    */
   }
 
   ionViewDidLoad() {
@@ -250,11 +245,30 @@ export class InicioPage implements OnInit {
     const idFilter = this.idSeccion;
     if (this.articulos3 === undefined) {
       console.log('Entro a GetRegularizacion()');
-      this.getRegularizacion();
+      this.getRegularizacion().then((data) => {
+        console.log('Dato Obtenido de true getRegularizacion() ' + JSON.stringify(data));
+      }).catch((error) => {
+        console.log('Dato obtenido de false getRegularizacion() ' + JSON.stringify(error));
+      });
     }
     this.articulos3 = this.todosArticulos.filter( (n) => {
       console.log('DATA DE SELECCION : ' + JSON.stringify(n));
       return n.SECCION === idFilter;
+    });
+  }
+
+  RemoveStorage() {
+    return new Promise((resolve, reject) => {
+      this.storage.keys().then((data) => {
+        console.log('DATA KEYS : ' + JSON.stringify(data));
+      });
+      this.storage.remove('regularizacion').then((data) => {
+        console.log('Datos del Remove : ' + JSON.parse(data));
+        resolve({value: true, values: data});
+      }).catch((error) => {
+        console.log('Error del remove : ' + JSON.stringify(error));
+        reject({value: false, values: error});
+      });
     });
   }
 
@@ -263,6 +277,10 @@ export class InicioPage implements OnInit {
     //dato.UNIDADES = dato.UNIDADES + 2;
     const suma = dato.FRACCION + dato.ADICIO;
     dato.DIFER = dato.STOCK - dato.UNIDADES + suma;
+    this.RemoveStorage().then((data: any) => {
+      console.log('Data Borrada : ' + JSON.stringify(data));
+    });
+    this.datalocal.SetDataRegularizacion(this.todosArticulos);
   }
 
   objectKeys(objeto: any) {

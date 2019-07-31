@@ -22,10 +22,15 @@ export class DataLocalService {
 
 
   getDataSweet() {
-    fetch('./assets/data/dataSweet.json').then(res => res.json())
-    .then(json => {
-      this.globales = json;
-      this.SetDataGlobal(this.globales);
+    return new Promise((resolve, rejecct) => {
+      fetch('./assets/data/dataSweet.json').then(res => res.json())
+      .then(json => {
+        this.globales = json;
+        this.SetDataGlobal(this.globales);
+        resolve({ value: true });
+      }).catch(() => {
+        rejecct({ value: false});
+      });
     });
   }
 
@@ -36,30 +41,40 @@ export class DataLocalService {
   }
 
   SetDataRegularizacion(obj: any) {
-    this.storage.ready().then(() => {
-      // console.log('ARTICULOS :' + obj[0].articulos);
-      this.storage.set('REGULARIZACION', JSON.stringify(
-        {
-          regularizacion : obj
-        }
-        ));
+    return new Promise((resolve, reject) => {
+      this.storage.ready().then((data) => {
+        // console.log('ARTICULOS :' + obj[0].articulos);
+        this.storage.set('REGULARIZACION', JSON.stringify(
+          {
+            regularizacion : obj
+          }
+          ));
+        resolve({value: true, values: data});
+      }).catch((error) => {
+        reject({value: false, values: error});
+      });
     });
   }
 
 
   SetDataGlobal(obj: any) {
-    this.storage.ready().then(() => {
-      // console.log('ARTICULOS :' + obj[0].articulos);
-      this.storage.set('USER', JSON.stringify(
-        {
-          articulos: obj[0].articulos,
-          kits: obj[0].kits,
-          almacenes: obj[0].almacenes,
-          stocks: obj[0].stocks,
-          regularizaciones: obj[0].regularizaciones,
-          secciones: obj[0].secciones
-        }
+    return new Promise((resolve, reject) => {
+      this.storage.ready().then(() => {
+        // console.log('ARTICULOS :' + obj[0].articulos);
+        this.storage.set('USER', JSON.stringify(
+          {
+            articulos: obj[0].articulos,
+            kits: obj[0].kits,
+            almacenes: obj[0].almacenes,
+            stocks: obj[0].stocks,
+            regularizaciones: obj[0].regularizaciones,
+            secciones: obj[0].secciones
+          }
         ));
+        resolve({value: true});
+      }).catch(() => {
+        reject({value: false});
+      });
     });
   }
 }

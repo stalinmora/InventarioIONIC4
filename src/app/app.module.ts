@@ -19,6 +19,7 @@ import { SQLitePorter } from '@ionic-native/sqlite-porter/ngx';
 import { SQLite } from '@ionic-native/sqlite/ngx';
 import { SqliteDbCopy } from '@ionic-native/sqlite-db-copy/ngx';
 import { SqlService } from './providers/sql/sql.service';
+import { DatePipe } from '@angular/common'
 
 @NgModule({
   declarations: [AppComponent],
@@ -28,7 +29,7 @@ import { SqlService } from './providers/sql/sql.service';
     StatusBar,
     SplashScreen,
     SqliteDbCopy,
-    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }, ConexionService, HttpClient, DataLocalService, DatabaseService,
+    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }, ConexionService, HttpClient, DataLocalService, DatabaseService, DatePipe,
     SqlService, SQLitePorter, SQLite
   ],
   bootstrap: [AppComponent]
