@@ -1,62 +1,116 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title class="ion-text-center"> Carga Plantilla </ion-title>
+    <ion-title class="ion-text-center">Carga Plantilla</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="btnDeleteData()" expand="full" color="primary">
+        <ion-icon name="trash"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-1x;centrar_content">
   <ion-item>
-    <ion-label> Fecha : </ion-label>
-    <ion-datetime [(ngModel)]="txtFecha" display-format='DD/MM/YYYY' (ionChange)="SeleccionaFecha($event)">
-    </ion-datetime>
+    <ion-label>Fecha :</ion-label>
+
+    <ion-datetime
+      [disabled]="isBtnCargar"
+      [(ngModel)]="txtFecha"
+      display-format="DD/MM/YYYY"
+      (ionChange)="SeleccionaFecha($event)"
+    ></ion-datetime>
   </ion-item>
+
   <ion-item>
     <ion-label class="ion-1x">Establecimiento</ion-label>
-    <ion-select  [(ngModel)]="idEstablecimiento" (ngModelChange)="SelectEstablecimiento($event)" class="ion-1x">
-      <ion-select-option class="ion-1x" *ngFor=" let locales of establecimientos" [value]=locales.CODALMACEN>
-        <ion-label class="ion-2x"> {{locales.NOMBREALMACEN}}</ion-label>
+
+    <ion-select
+    [disabled]="isBtnCargar"  
+    [(ngModel)]="idEstablecimiento"
+      (ngModelChange)="SelectEstablecimiento($event)"
+      class="ion-1x"
+    >
+      <ion-select-option
+        class="ion-1x"
+        *ngFor="let locales of establecimientos"
+        [value]="locales.CODALMACEN"
+      >
+        <ion-label class="ion-2x">{{locales.NOMBREALMACEN}}</ion-label>
       </ion-select-option>
     </ion-select>
   </ion-item>
-  <ion-button expand="block" color="primary" (click)="BtnClickCargar()">
-    Cargar
-  </ion-button>
+
+  <ion-button
+    [disabled]="isBtnCargar"
+    expand="block"
+    color="primary"
+    (click)="BtnClickCargar()"
+  >Cargar</ion-button>
+
   <ion-item>
-      <ion-label>Tipo Articulos</ion-label>
-      <ion-select [(ngModel)]="idSeccion" (ngModelChange)="SelectSeccion($event)" class="ion-1x">
-        <ion-select-option class="ion-1x" *ngFor="let seccion of secciones" [value]=seccion.SECCION>
-          <ion-label class="ion-2x">{{ seccion.DESCRIPCION }}</ion-label>
-        </ion-select-option>
-      </ion-select>
+    <ion-label>Tipo Articulos</ion-label>
+
+    <ion-select
+      [(ngModel)]="idSeccion"
+      (ngModelChange)="SelectSeccion($event)"
+      class="ion-1x"
+    >
+      <ion-select-option
+        class="ion-1x"
+        *ngFor="let seccion of secciones"
+        [value]="seccion.SECCION"
+      >
+        <ion-label class="ion-2x">{{ seccion.DESCRIPCION }}</ion-label>
+      </ion-select-option>
+    </ion-select>
   </ion-item>
-    <ion-grid class="ion-2x">
-      <ion-row style="border-bottom: 0.5px solid gray;">
-        <ion-col size="7">Descripcion</ion-col>
-        <!--<ion-col col-2 >Cod.</ion-col>-->
-        <ion-col>Unid.</ion-col>
-        <ion-col>Stock</ion-col>
-        <ion-col>Difer</ion-col>
-      </ion-row>
-      <ion-row style="border-bottom: 0.5px solid gray;" *ngFor="let dato of articulos3">
-        <ion-col size="7">
-          {{dato.DESCRIPCION}}
-        </ion-col>
-        <!--<ion-col col-2 text-center>
+
+  <ion-grid class="ion-2x">
+    <ion-row style="border-bottom: 0.5px solid gray;">
+      <ion-col size="7">Descripcion</ion-col>
+
+      <!-- <ion-col col-2 >Cod.</ion-col> -->
+
+      <ion-col>Unid.</ion-col>
+
+      <ion-col>Stock</ion-col>
+
+      <ion-col>Difer</ion-col>
+    </ion-row>
+
+    <ion-row
+      style="border-bottom: 0.5px solid gray;"
+      *ngFor="let dato of articulos3"
+    >
+      <ion-col size="7">{{dato.DESCRIPCION}}</ion-col>
+
+      <!-- <ion-col col-2 text-center>
               {{dato.orden}}
-          </ion-col>-->
-        <ion-col class="ion-2x">
-            <ion-input text-ri type="number" color="primary" [(ngModel)]="dato.UNIDADES" (change)="Calcular(dato)">
-            </ion-input>
-        </ion-col>
-        <ion-col>
-          {{dato.STOCK | number:'1.2-2'}}
-        </ion-col>
-        <ion-col>
-          {{dato.DIFER | number:'1.2-2'}}
-        </ion-col>
-      </ion-row>
-    </ion-grid>
-    <ion-button expand="block" color="primary" (click)="BtnClickCargar()">
-      Adicionar PT
-    </ion-button>
+          </ion-col> -->
+
+      <ion-col class="ion-2x">
+        <ion-input
+          text-ri="text-ri"
+          type="number"
+          color="primary"
+          [(ngModel)]="dato.UNIDADES"
+          (change)="Calcular(dato)"
+        ></ion-input>
+      </ion-col>
+
+      <ion-col>
+        {{dato.STOCK | number:'1.2-2'}}
+      </ion-col>
+
+      <ion-col>
+        {{dato.DIFER | number:'1.2-2'}}
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <ion-button
+    expand="block"
+    color="primary"
+    routerLink="/adicionar-pt"
+  >Adicionar PT</ion-button>
 </ion-content>

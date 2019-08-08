@@ -39,8 +39,9 @@ export class InicioPage implements OnInit {
   articulos3: any;
   txtFecha: any;
   flag: any;
+  isBtnCargar: boolean = false;
   myGroup: FormGroup;
-  fData = {'datetime': ''};
+  fData = { 'datetime': '' };
   private timeoutTime = 10000;
 
   constructor(
@@ -56,25 +57,30 @@ export class InicioPage implements OnInit {
     public Loading: LoadingController,
     public alertas: AlertasService,
     public datepipe: DatePipe
-    ) {
-      this.myGroup = new FormGroup({
-        datetime: new FormControl('', [Validators.required]),
-      });
-      setTimeout(() => {
-        this.databaseService.init().then((data: any) => {
-          console.log('Retorno de INIT() : ' + JSON.stringify(data.value));
-          this.CargarDatos().then(() => {
-            console.log('data cargada');
-          });
+  ) {
+    this.myGroup = new FormGroup({
+      datetime: new FormControl('', [Validators.required]),
+    });
+    setTimeout(() => {
+      this.databaseService.init().then((data: any) => {
+        console.log('Retorno de INIT() : ' + JSON.stringify(data.value));
+        this.CargarDatos().then(() => {
+          console.log('data cargada');
         });
-      }, 4000);
+      });
+    }, 4000);
+    this.GetParametros().then((data: any) => {
+      if (data.value == true) {
+        console.log('PARAMETROS ENCONTRADOS');
+      }
+    });
   }
 
   getRegularizacion() {
     return new Promise((resolve, reject) => {
       if (this.articulos3 === undefined) {
         setTimeout(() => {
-          this.storage.get('REGULARIZACION').then((data) => {
+          this.storage.get('REGULARIZACION' + this.idEstablecimiento).then((data) => {
             const t = JSON.parse(data);
             this.articulos3 = t.regularizacion;
             this.todosArticulos = t.regularizacion;
@@ -83,9 +89,9 @@ export class InicioPage implements OnInit {
             this.articulos3 = this.todosArticulos.filter(function (n) {
               return n.SECCION === idFilter;
             });
-            resolve({value: true, values: data});
+            resolve({ value: true, values: data });
           }).catch((error) => {
-            reject({value: false, values: error});
+            reject({ value: false, values: error });
           });
         }, 5000);
       }
@@ -101,21 +107,21 @@ export class InicioPage implements OnInit {
       });
       loading.present().then(() => {
         this.sql.getArticulosInventario(3)
-        .then((data) => {
-          console.log('DATOS DE GETARTICULOSALL : ' + JSON.stringify(data));
-          this.datalocal.SetDataRegularizacion(data);
-        })
-        .catch((error) => {
-          console.log('ERROR getArticulosInventario Articulos 3 : ' + JSON.stringify(error));
-        });
+          .then((data) => {
+            console.log('DATOS DE GETARTICULOSALL : ' + JSON.stringify(data));
+            this.datalocal.SetDataRegularizacion(data);
+          })
+          .catch((error) => {
+            console.log('ERROR getArticulosInventario Articulos 3 : ' + JSON.stringify(error));
+          });
       });
       setTimeout(() => {
         loading.dismiss().then((data) => {
           resolve(data);
         })
-        .catch((error) => {
-          reject(error);
-        });
+          .catch((error) => {
+            reject(error);
+          });
       }, this.timeoutTime + 7000);
     });
   }
@@ -130,7 +136,7 @@ export class InicioPage implements OnInit {
 
 
   async InsertaTablas() {
-    return new Promise(async (resolve, reject) =>{
+    return new Promise(async (resolve, reject) => {
       const loading = await this.Loading.create({
         message: 'Insertando Datos en Tablas ... ',
         spinner: 'crescent',
@@ -147,16 +153,36 @@ export class InicioPage implements OnInit {
             console.log('INSERT COMPLETE');
             resolve(data);
           })
-          .catch((error) => {
-            reject(error);
-          });
+            .catch((error) => {
+              reject(error);
+            });
         }, this.timeoutTime + 10000);
       });
     });
   }
 
+  btnDeleteData() {
+    this.storage.remove('REGULARIZACION' + this.idEstablecimiento).then((data) => {
+      console.log('Eliminando Regularizacion : ' + JSON.stringify(data));
+    }).catch((error) => {
+      console.log('Error eliminando : ' + JSON.stringify(error));
+    });
+    this.storage.remove('PARAM').then((data) => {
+      console.log('Eliminando Regularizacion : ' + JSON.stringify(data));
+      this.idEstablecimiento = null;
+      this.txtFecha = null;
+      this.isBtnCargar = false;
+    }).catch((error) => {
+      console.log('Error eliminando : ' + JSON.stringify(error));
+    });
+    this.storage.keys().then((val) => {
+      console.log('DATA KEYS : ' + JSON.stringify(val));
+    });
+    this.articulos3 = null;
+  }
+
   async CargarDatos() {
-    return new Promise(async (resolve, reject ) =>{
+    return new Promise(async (resolve, reject) => {
       const loading = await this.Loading.create({
         message: 'Cargando Datos ... ',
         spinner: 'circles',
@@ -181,31 +207,83 @@ export class InicioPage implements OnInit {
           loading.dismiss().then((data) => {
             resolve(data);
           })
-          .catch((error) => {
-            reject(error);
-          });
+            .catch((error) => {
+              reject(error);
+            });
         }, this.timeoutTime + 10000);
+      });
+    });
+  }
+
+  SetDatosParametros() {
+    /*
+    this.storage.get('REGULARIZACION' + this.idEstablecimiento).then((val) => {
+      console.log('DATA de SetParametros : ' + JSON.parse(val));
+      console.log('DATA de SetParametros : ' + JSON.stringify(val));
+    })
+    .catch((error) => {
+      console.log('Error de SetDatosParametros : ' + JSON.parse(error));
+    });
+    this.storage.remove('REGULARIZACION' + this.idEstablecimiento).then((data) => {
+      console.log('Eliminando Regularizacion : ' + JSON.stringify(data));
+    }).catch((error) => {
+      console.log('Error eliminando : ' + JSON.stringify(error));
+    });
+    */
+    const data = JSON.stringify(
+      {
+        CODALMACEN: this.idEstablecimiento,
+        FECHA: this.txtFecha,
+      }
+    );
+    this.storage.set('PARAM', data ).then((val) => {
+      console.log('Parametros Guardados : ' + JSON.stringify(val));
+      this.isBtnCargar = true;
+    }).catch((error) => {
+      console.log('Error al Guardar Parametros : ' + JSON.stringify(error));
+    });
+    this.storage.keys().then((val) => {
+      console.log('DATA KEYS : ' + JSON.stringify(val));
+    });
+  }
+
+  GetParametros() {
+    return new Promise((resolve, reject) => {
+      this.storage.get('PARAM').then((val) => {
+        console.log('DATA PARAM : ' + JSON.stringify(val));
+        const t = JSON.parse(val);
+        this.idEstablecimiento = t.CODALMACEN;
+        console.log('CODALMACEN : ' + t.CODALMACEN);
+        this.txtFecha = t.FECHA;
+        console.log('CODALMACEN : ' + t.FECHA);
+        resolve({value: true});
+        this.isBtnCargar = true;
+      }).catch((error) => {
+        console.log('Error al obetner parametros.');
+        reject({value: false});
       });
     });
   }
 
   VerificaRegularizacion() {
     return new Promise((resolve, reject) => {
-      this.storage.get('REGULARIZACION').then((data) => {
+      this.storage.get('REGULARIZACION' + this.idEstablecimiento).then((data) => {
         const t = JSON.parse(data);
+        console.log('VALOR de t : ' + JSON.stringify(t));
+        console.log('VALOR DE DATA : ' + JSON.stringify(data));
         const articulos3 = t.regularizacion;
-        console.log('DATA t Articulos 3 : ' + articulos3 );
+        console.log('DATA t Articulos 3 : ' + articulos3);
         if (articulos3 != undefined || articulos3 != null) {
-          resolve({value: true});
+          resolve({ value: true });
         } else {
-          reject({value: false });
+          reject({ value: false });
         }
       });
     });
   }
 
   BtnClickCargar() {
-    if (this.articulos3 === undefined) {
+    if (this.articulos3 != undefined) {
       console.log('EXISTE DATA EN BTNCLICKCARGAR()');
       this.alertas.show('Ya se encuntra una data');
     } else {
@@ -214,6 +292,17 @@ export class InicioPage implements OnInit {
       } else if (this.idEstablecimiento === null || this.idEstablecimiento === undefined) {
         this.alertas.show('Debe escoger un establecimiento valido');
       } else {
+        this.txtFecha = this.datepipe.transform(this.txtFecha, 'yyyyMMdd');
+        console.log('Fecha es : ' + this.txtFecha);
+        this.sql.getRegularizacion(this.idEstablecimiento, this.txtFecha).then((data) => {
+          console.log('DATA BTN CARGAR : ' + JSON.stringify(data));
+          this.datalocal.SetDataRegularizacionBodega(this.idEstablecimiento, data).then(() => {
+            console.log('Data extraida correctamente');
+            this.getRegularizacion();
+            this.SetDatosParametros();
+          });
+        });
+        /*
         this.VerificaRegularizacion().then((data: any) => {
             console.log('EXISTE DATA en REGULARIZACION :' + data.value);
             this.getRegularizacion();
@@ -223,12 +312,13 @@ export class InicioPage implements OnInit {
             console.log('Fecha es : ' + this.txtFecha);
             this.sql.getRegularizacion(this.idEstablecimiento, this.txtFecha).then((data) => {
             console.log('DATA BTN CARGAR : ' + JSON.stringify(data));
-            this.datalocal.SetDataRegularizacion(data).then(() => {
+            this.datalocal.SetDataRegularizacionBodega(this.idEstablecimiento, data).then(() => {
               console.log('Data extraida correctamente');
               this.getRegularizacion();
             });
           });
         });
+        */
       }
     }
   }
@@ -251,7 +341,7 @@ export class InicioPage implements OnInit {
         console.log('Dato obtenido de false getRegularizacion() ' + JSON.stringify(error));
       });
     }
-    this.articulos3 = this.todosArticulos.filter( (n) => {
+    this.articulos3 = this.todosArticulos.filter((n) => {
       console.log('DATA DE SELECCION : ' + JSON.stringify(n));
       return n.SECCION === idFilter;
     });
@@ -264,10 +354,10 @@ export class InicioPage implements OnInit {
       });
       this.storage.remove('regularizacion').then((data) => {
         console.log('Datos del Remove : ' + JSON.parse(data));
-        resolve({value: true, values: data});
+        resolve({ value: true, values: data });
       }).catch((error) => {
         console.log('Error del remove : ' + JSON.stringify(error));
-        reject({value: false, values: error});
+        reject({ value: false, values: error });
       });
     });
   }
@@ -280,7 +370,7 @@ export class InicioPage implements OnInit {
     this.RemoveStorage().then((data: any) => {
       console.log('Data Borrada : ' + JSON.stringify(data));
     });
-    this.datalocal.SetDataRegularizacion(this.todosArticulos);
+    this.datalocal.SetDataRegularizacionBodega(this.idEstablecimiento, this.todosArticulos);
   }
 
   objectKeys(objeto: any) {

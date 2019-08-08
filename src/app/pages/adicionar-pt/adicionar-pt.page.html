@@ -1,9 +1,62 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>adicionar_pt</ion-title>
+    <ion-row>
+      <ion-col>
+        <ion-button expand="full" color="primary" (click)="btnCargar()"
+          >Cargar datos</ion-button
+        >
+      </ion-col>
+      <ion-col>
+        <ion-button expand="full" color="primary" (click)="btnDelete()"
+          >Eliminar Datos</ion-button
+        >
+      </ion-col>
+    </ion-row>
+    <ion-title class="ion-text-center">Adicionar PT</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-searchbar animated="animated" (ionChange)="Buscar($event)"></ion-searchbar>
 
+<ion-content>
+  <ion-grid class="ion-2x">
+    <ion-row style="border-bottom: 0.5px solid gray;">
+      <ion-col size="8">Descripcion</ion-col>
+
+      <!-- <ion-col col-2 >Cod.</ion-col> -->
+
+      <ion-col>Unid.</ion-col>
+    </ion-row>
+
+    <ion-row
+      style="border-bottom: 0.5px solid gray;"
+      *ngFor="let dato of articulos | filtro: txtBuscar"
+    >
+      <ion-col size="8">{{ dato.DESCRIPCION }}</ion-col>
+
+      <!-- <ion-col col-2 text-center>
+            {{dato.orden}}
+        </ion-col> -->
+
+      <ion-col class="ion-2x">
+        <ion-input
+          text-ri="text-ri"
+          type="number"
+          color="primary"
+          [(ngModel)]="dato.UNIDADES"
+          (change)="Calcular(dato)"
+        ></ion-input>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <ion-infinite-scroll
+    threshold="200px"
+    (ionInfinite)="LoadRegularizacion($event)"
+  >
+    <ion-infinite-scroll-content
+      loadingSpinner="bubbles"
+      loadingText="Loading more data..."
+    ></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
 </ion-content>

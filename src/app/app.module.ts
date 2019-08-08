@@ -20,11 +20,12 @@ import { SQLite } from '@ionic-native/sqlite/ngx';
 import { SqliteDbCopy } from '@ionic-native/sqlite-db-copy/ngx';
 import { SqlService } from './providers/sql/sql.service';
 import { DatePipe } from '@angular/common'
+import { PipesModule } from './pipes/pipes.module';
 
 @NgModule({
   declarations: [AppComponent],
   entryComponents: [],
-  imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule,  ComponentsModule, HttpClientModule, IonicStorageModule.forRoot() ],
+  imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule, PipesModule, ComponentsModule, HttpClientModule, IonicStorageModule.forRoot() ],
   providers: [
     StatusBar,
     SplashScreen,

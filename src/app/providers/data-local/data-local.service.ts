@@ -20,6 +20,33 @@ export class DataLocalService {
     });
   }
 
+  /**
+   * @description: Obtiene Regularizacion 
+   * @returns: Promise
+   */
+  GetRegularizacion() {
+    return new Promise((resolve, reject) => {
+      this.storage.get('REGULARIZACION').then((data) => {
+        resolve({value: true, values: JSON.parse(data)});
+      }).catch((error) => {
+        reject({value: false, values: JSON.parse(error)});
+      });
+    });
+  }
+
+  SetComponentes(obj: any) {
+    
+  }
+
+  GetDataRegularizacion(page: any) {
+    let items;
+    let pages;
+    this.GetRegularizacion().then((data: any) => {
+      items = data.values.regularizacion;
+      pages = items.length / 30;
+    });
+
+  }
 
   getDataSweet() {
     return new Promise((resolve, rejecct) => {
@@ -40,6 +67,32 @@ export class DataLocalService {
     });
   }
 
+  SetDataRegularizacionBodega(bodega: string, obj: any) {
+    return new Promise((resolve, reject) => {
+      this.storage.ready().then((data) => {
+        // console.log('ARTICULOS :' + obj[0].articulos);
+        this.storage.set('REGULARIZACION' + bodega, JSON.stringify(
+          {
+            regularizacion : obj
+          }
+          ));
+        resolve({value: true, values: data});
+      }).catch((error) => {
+        reject({value: false, values: error});
+      });
+    });
+  }
+
+  GetRegularizacionBodega(bodega: string) {
+    return new Promise((resolve, reject) => {
+      this.storage.get('REGULARIZACION' + bodega).then((data) => {
+        resolve({value: true, values: JSON.parse(data)});
+      }).catch((error) => {
+        reject({value: false, values: JSON.parse(error)});
+      });
+    });
+  }
+
   SetDataRegularizacion(obj: any) {
     return new Promise((resolve, reject) => {
       this.storage.ready().then((data) => {
@@ -49,6 +102,69 @@ export class DataLocalService {
             regularizacion : obj
           }
           ));
+        resolve({value: true, values: data});
+      }).catch((error) => {
+        reject({value: false, values: error});
+      });
+    });
+  }
+
+  RemoveStorageBodega(bodega: string) {
+    return new Promise((resolve, reject) => {
+      this.storage.keys().then((data) => {
+        console.log('DATA KEYS : ' + JSON.stringify(data));
+      });
+      this.storage.ready().then(() => {
+        this.storage.remove('REGULARIZACION' + bodega).then((data) => {
+          console.log('Datos del Remove : ' + JSON.parse(data));
+          resolve({value: true, values: data});
+        }).catch((error) => {
+          console.log('Error del remove : ' + JSON.stringify(error));
+          reject({value: false, values: error});
+        });
+      }).catch(() => {});
+    });
+  }
+
+  RemoveStorage(nombre: string) {
+    return new Promise((resolve, reject) => {
+      this.storage.keys().then((data) => {
+        console.log('DATA KEYS : ' + JSON.stringify(data));
+      });
+      this.storage.ready().then(() => {
+        this.storage.remove(nombre).then((data) => {
+          console.log('Datos del Remove : ' + JSON.parse(data));
+          resolve({value: true, values: data});
+        }).catch((error) => {
+          console.log('Error del remove : ' + JSON.stringify(error));
+          reject({value: false, values: error});
+        });
+      }).catch(() => {});
+    });
+  }
+
+  GetPT() {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        this.storage.get('PT').
+        then((data) => {
+          console.log('EN GetPT en data-local-services');
+          resolve({value: true, values: JSON.parse(data)});
+        }).catch((error) => {
+          reject({value: false, values: JSON.parse(error)});
+        });
+      }, 1000);
+    });
+  }
+
+  SetDataPT(obj: any){
+    return new Promise((resolve, reject) => {
+      this.storage.ready().then((data) => {
+        this.storage.set('PT', JSON.stringify(
+          {
+            pt : obj
+          }
+        ));
         resolve({value: true, values: data});
       }).catch((error) => {
         reject({value: false, values: error});

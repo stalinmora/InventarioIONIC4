@@ -22,6 +22,48 @@ export class SqlService {
     });
   }
 
+  GetPtsComponentes(codarticulo: any) {
+    return new Promise((resolve, reject) => {
+      let q = 'SELECT K.LINEAKIT,K.CODARTKIT,A.DESCRIPCION,A.REFERENCIA,A.UDSELABORACION,A.UNIDADMEDIDA,A.ESKIT, ';
+      q = q + 'A.ULTIMOCOSTE,A.USASTOCKS,K.UNIDADES';
+      q = q + ' FROM KITS K LEFT JOIN ARTICULOS A ON K.CODARTKIT=A.CODARTICULO WHERE K.CODARTICULO= ' + codarticulo ;
+      this.data.GetDataScript(q).then((data) => {
+        console.log('VALOR DEVUELTO en GetPtsComponentes : ' + codarticulo + ' DATA : ' + JSON.stringify(data));
+        resolve({value: true, values: data});
+      }).
+      catch((error) => {
+        console.log('VALOR DEVUELTO con error en GetPtsComponentes : ' + JSON.stringify(error));
+        reject({value: false, values: error});
+      });
+    });
+  }
+
+  IsPt(codarticulo: any) {
+    return new Promise((resolve, reject) => {
+      let q = 'SELECT DESCRIPCION, CODARTICULO, ESKIT FROM ARTICULOS WHERE CODARTICULO= ' + codarticulo;
+      console.log('VALOR DEL SELECT IsPT : ' + q);
+      this.data.GetDataScript(q).
+        then((data) => {
+          resolve({ value: true, values: data });
+        }).catch((error) => {
+          reject({ value: false, values: error });
+        });
+    });
+  } 
+
+  GetPts() {
+    return new Promise((resolve, reject) => {
+      let q = 'SELECT A.CODARTICULO, A.DESCRIPCION, 0 AS UNIDADES FROM ARTICULOS a INNER JOIN SECCIONES S ';
+      q = q + 'ON (a.SECCION = S.SECCION) WHERE S.SECCION IN (20,21,22,24, 30,31,32)';
+      this.data.GetDataScript(q).
+      then((data) => {
+        resolve({value: true, values: data});
+      }).catch((error) => {
+        reject({value: false, values: error});
+      });
+    });
+  }
+
   getRegularizacion(codalmacen: string, fecha: string) {
     return new Promise((resolve, reject) => {
       let q = 'SELECT A.DESCRIPCION, ST.CODALMACEN, A.CODARTICULO,A.SECCION,\'.\' AS TALLA,\'.\' AS COLOR ,0 AS UNIDADES,0 AS STOCKFINAL, ST.STOCK,' ;
@@ -33,20 +75,18 @@ export class SqlService {
         // console.log('Respuesta de GetDataScript SQL SERVICE : ' + JSON.stringify(respon));
         resolve(respon);
       })
-      .catch((error) =>{
+      .catch((error) => {
         // console.log('Error de GetDataScript SQL SERVICE : ' + JSON.stringify(error));
         reject(error);
       });
     });
   }
 
-
-
   getArticulosInventario(codArticulo: any) {
     return new Promise((resolve, reject) => {
       let q = 'SELECT A.DESCRIPCION, ST.CODALMACEN, A.CODARTICULO,A.SECCION,\'.\' AS TALLA,\'.\' AS COLOR ,0 AS UNIDADES,0 AS STOCKFINAL, ST.STOCK,';
       q = q + '0 AS FRACCION, 0 AS ADICIO, ST.STOCK AS DIFER, \'F\' AS CUADRADO ,A.ULTIMOCOSTE AS PRECIO, A.ULTIMOCOSTE AS PVP,1 AS CODMONEDAAPVP,\'20190722\' AS FECHA ';
-      q = q + ' FROM ARTICULOS A LEFT JOIN STOCKS ST ON (A.CODARTICULO = ST.CODARTICULO) WHERE (ST.CODALMACEN=\'QA\' OR ST.CODALMACEN IS NULL) AND A.USASTOCKS =\'T\'';
+      q = q + ' FROM ARTICULOS A LEFT JOIN STOCKS ST ON (A.CODARTICULO = ST.CODARTICULO) WHERE (ST.CODALMACEN=\'QA\' OR ST.CODALMACEN IS NULL) AND A.USASTOCKS =\'T\' ORDER BY A.DESCRIPCION';
       console.log('Entrando a GetArticulosInventario : ' + q);
       this.data.GetDataScript(q)
       .then((respon) => {
