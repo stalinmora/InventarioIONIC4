@@ -190,27 +190,6 @@ export class DatabaseService {
         });
       }, 4000);
     });
-    /*
-     let sql =
-      "CREATE TABLE IF NOT EXISTS ARTICULOS (CODARTICULO	INTEGER NOT NULL,REFERENCIA	TEXT DEFAULT NULL,DESCRIPCION ";
-    sql =
-      sql +
-      "TEXT DEFAULT NULL, SECCION	INTEGER,UNIDADES	REAL,ESKIT	TEXT,UNIDADMEDIDA	TEXT,UDSELABORACION	REAL, ";
-    sql =
-      sql +
-      "ULTIMOCOSTE	REAL, USASTOCKS	TEXT,DESCATALOGADO	TEXT,PRIMARY KEY(CODARTICULO))"; 
-    setTimeout(() => {
-      this._DB
-      .executeSql(sql, [])
-      .then(response => {
-        console.log('Creando la tabla ARTICULOS : ' + JSON.stringify(response));
-        return Promise.resolve(response);
-      })
-      .catch(error => {
-        Promise.reject(error);
-      });
-    }, 4000);
-    */
   }
 
    async InsertArticulos(obj: any) {
@@ -259,22 +238,6 @@ export class DatabaseService {
         });
       }, 4000);
     });
-
-/*
-    let sql =
-      "CREATE TABLE IF NOT EXISTS KITS (CODARTICULO INTEGER,CODARTKIT INTEGER,DESCRIPCIOKIT TEXT,LINEAKIT INTEGER,";
-    sql =
-      sql +
-      " PRECIOUNIDAD REAL,REFERENCIA TEXT,REFERENCIAKIT TEXT,TOTALLINEA	REAL,UNIDADES REAL)";
-    this._DB
-      .executeSql(sql, [])
-      .then(response => {
-        return Promise.resolve(response);
-      })
-      .catch(error => {
-        Promise.reject(error);
-      });
-      */
   }
 
   InsertKits(obj: any) {

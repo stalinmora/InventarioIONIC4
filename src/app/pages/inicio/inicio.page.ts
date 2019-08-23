@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { DataLocalService } from '../../providers/data-local/data-local.service';
 import { DatabaseService } from '../../providers/database/database.service';
 import { Storage } from '@ionic/storage';
-import { Platform, NavController, LoadingController } from '@ionic/angular';
+import { Platform, NavController, LoadingController, AlertController } from '@ionic/angular';
 import { isJsObject } from '@angular/core/src/change_detection/change_detection_util';
 import { SqlService } from '../../providers/sql/sql.service';
 import { load } from '@angular/core/src/render3';
@@ -14,7 +14,7 @@ import { AlertasService } from '../../providers/alertas/alertas.service';
 import { async } from '@angular/core/testing';
 import { DatePipe } from '@angular/common';
 import { jsonpCallbackContext } from '@angular/common/http/src/module';
-
+import { present } from '@ionic/core/dist/types/utils/overlays';
 
 
 @Component({
@@ -56,19 +56,20 @@ export class InicioPage implements OnInit {
     public nav: NavController,
     public Loading: LoadingController,
     public alertas: AlertasService,
-    public datepipe: DatePipe
+    public datepipe: DatePipe,
+    public alertCtrl: AlertController
   ) {
     this.myGroup = new FormGroup({
       datetime: new FormControl('', [Validators.required]),
     });
-    setTimeout(() => {
-      this.databaseService.init().then((data: any) => {
-        console.log('Retorno de INIT() : ' + JSON.stringify(data.value));
-        this.CargarDatos().then(() => {
-          console.log('data cargada');
-        });
+    // setTimeout(() => {
+    this.databaseService.init().then((data: any) => {
+      console.log('Retorno de INIT() : ' + JSON.stringify(data.value));
+      this.CargarDatos().then(() => {
+        console.log('data cargada');
       });
-    }, 4000);
+    });
+    // }, 4000);
     this.GetParametros().then((data: any) => {
       if (data.value == true) {
         console.log('PARAMETROS ENCONTRADOS');
@@ -127,7 +128,6 @@ export class InicioPage implements OnInit {
   }
 
   ngOnInit() {
-    //this.getArticulos();
   }
 
   SeleccionaFecha() {
@@ -161,24 +161,45 @@ export class InicioPage implements OnInit {
     });
   }
 
-  btnDeleteData() {
-    this.storage.remove('REGULARIZACION' + this.idEstablecimiento).then((data) => {
-      console.log('Eliminando Regularizacion : ' + JSON.stringify(data));
-    }).catch((error) => {
-      console.log('Error eliminando : ' + JSON.stringify(error));
+  async btnDeleteData() {
+    const alert = await this.alertCtrl.create({
+      header: 'Eliminar',
+      subHeader: 'Desea Limpiar la Regularizion del Dispositivo?',
+      animated: true,
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+          cssClass: 'secondary',
+          handler: () => {
+            console.log('Confirmando Cancelado');
+          }
+        },
+        {
+          text: 'OK',
+          handler: () => {
+            this.storage.remove('REGULARIZACION' + this.idEstablecimiento).then((data) => {
+              console.log('Eliminando Regularizacion : ' + JSON.stringify(data));
+            }).catch((error) => {
+              console.log('Error eliminando : ' + JSON.stringify(error));
+            });
+            this.storage.remove('PARAM').then((data) => {
+              console.log('Eliminando Regularizacion : ' + JSON.stringify(data));
+              this.idEstablecimiento = null;
+              this.txtFecha = null;
+              this.isBtnCargar = false;
+            }).catch((error) => {
+              console.log('Error eliminando : ' + JSON.stringify(error));
+            });
+            this.storage.keys().then((val) => {
+              console.log('DATA KEYS : ' + JSON.stringify(val));
+            });
+            this.articulos3 = null;
+          }
+        }
+      ]
     });
-    this.storage.remove('PARAM').then((data) => {
-      console.log('Eliminando Regularizacion : ' + JSON.stringify(data));
-      this.idEstablecimiento = null;
-      this.txtFecha = null;
-      this.isBtnCargar = false;
-    }).catch((error) => {
-      console.log('Error eliminando : ' + JSON.stringify(error));
-    });
-    this.storage.keys().then((val) => {
-      console.log('DATA KEYS : ' + JSON.stringify(val));
-    });
-    this.articulos3 = null;
+    alert.present();
   }
 
   async CargarDatos() {
@@ -200,7 +221,6 @@ export class InicioPage implements OnInit {
           console.log('DATA CARGADA DE CargarDatos() : ' + JSON.stringify(this.secciones));
           await this.InsertaTablas().then((data) => {
             console.log('Valor de respuesta de Inserta Tablas :' + JSON.stringify(data));
-            //this.getArticulosAll();
           });
         });
         setTimeout(() => {
@@ -216,20 +236,6 @@ export class InicioPage implements OnInit {
   }
 
   SetDatosParametros() {
-    /*
-    this.storage.get('REGULARIZACION' + this.idEstablecimiento).then((val) => {
-      console.log('DATA de SetParametros : ' + JSON.parse(val));
-      console.log('DATA de SetParametros : ' + JSON.stringify(val));
-    })
-    .catch((error) => {
-      console.log('Error de SetDatosParametros : ' + JSON.parse(error));
-    });
-    this.storage.remove('REGULARIZACION' + this.idEstablecimiento).then((data) => {
-      console.log('Eliminando Regularizacion : ' + JSON.stringify(data));
-    }).catch((error) => {
-      console.log('Error eliminando : ' + JSON.stringify(error));
-    });
-    */
     const data = JSON.stringify(
       {
         CODALMACEN: this.idEstablecimiento,
@@ -302,23 +308,6 @@ export class InicioPage implements OnInit {
             this.SetDatosParametros();
           });
         });
-        /*
-        this.VerificaRegularizacion().then((data: any) => {
-            console.log('EXISTE DATA en REGULARIZACION :' + data.value);
-            this.getRegularizacion();
-          }).catch((error) => {
-            console.log('Existe data : ' + error);
-            this.txtFecha = this.datepipe.transform(this.txtFecha, 'yyyyMMdd');
-            console.log('Fecha es : ' + this.txtFecha);
-            this.sql.getRegularizacion(this.idEstablecimiento, this.txtFecha).then((data) => {
-            console.log('DATA BTN CARGAR : ' + JSON.stringify(data));
-            this.datalocal.SetDataRegularizacionBodega(this.idEstablecimiento, data).then(() => {
-              console.log('Data extraida correctamente');
-              this.getRegularizacion();
-            });
-          });
-        });
-        */
       }
     }
   }
@@ -366,7 +355,7 @@ export class InicioPage implements OnInit {
     this.flag = true;
     //dato.UNIDADES = dato.UNIDADES + 2;
     const suma = dato.FRACCION + dato.ADICIO;
-    dato.DIFER = dato.STOCK - dato.UNIDADES + suma;
+    dato.DIFER = (dato.UNIDADES + suma) - dato.STOCK;
     this.RemoveStorage().then((data: any) => {
       console.log('Data Borrada : ' + JSON.stringify(data));
     });

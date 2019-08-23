@@ -7,6 +7,7 @@ const routes: Routes = [
   { path: 'alert', loadChildren: './pages/alert/alert.module#AlertPageModule' },
   { path: 'action-sheet', loadChildren: './pages/action-sheet/action-sheet.module#ActionSheetPageModule' },
   { path: 'adicionar-pt', loadChildren: './pages/adicionar-pt/adicionar-pt.module#AdicionarPtPageModule' },
+  { path: 'final', loadChildren: './pages/final/final.module#FinalPageModule' },
 ];
 
 @NgModule({

@@ -5,6 +5,7 @@ import { resolve } from 'url';
 import { async } from '@angular/core/testing';
 
 const ITEMS_KITS = 'mi_componentes_kits';
+const KITS = 'kits_articulos';
 
 @Injectable({
   providedIn: 'root'
@@ -55,7 +56,7 @@ export class KitsService {
         }
       });
     });
-    return promise; 
+    return promise;
   }
 
   Add_Items(obj: any) {
@@ -78,62 +79,42 @@ export class KitsService {
     });
   }
 
+  SetArticulosKits(obj: any) {
+    return this.storage.get(KITS).then((data) => {
+      if (data) {
+        obj.forEach(a => {
+          data.push(a);
+        });
+        return this.storage.set(KITS, data);
+      } else {
+        return this.storage.set(KITS, obj);
+      }
+    });
+  }
+
   // tslint:disable-next-line: adjacent-overload-signatures
   Add_Articulos(item: any, unidades: any = 1) {
     console.log('VALOR DE ITEM en Add_Articulos : ' + item + ' , UNIDADES : ' + unidades);
     return this.storage.get(ITEMS_KITS).then((data) => {
       if (data) {
-        const val = JSON.stringify(
-          {
-            CODARTKIT: item.CODARTKIT,
-            DESCRIPCION: item.DESCRIPCION,
-            ESKIT: item.ESKIT,
-            LINEAKIT: item.LINEAKIT,
-            REFERENCIA: item.REFERENCIA,
-            UDSELABORACION: item.UDSELABORACION,
-            ULTIMOCOSTE: item.ULTIMOCOSTE,
-            UNIDADES: ((item.UNIDADES / item.UDSELABORACION) * unidades),
-            UNIDADMEDIDA: item.UNIDADMEDIDA,
-            USASTOCKS: item.USASTOCKS
-          }
-          );
-        data.push(val);
+        data.push(item);
+        console.log('DATA : Add_Articulos ' + data);
         return this.storage.set(ITEMS_KITS, data);
       } else {
-        const val = JSON.stringify(
-          {
-            CODARTKIT: item.CODARTKIT,
-            DESCRIPCION: item.DESCRIPCION,
-            ESKIT: item.ESKIT,
-            LINEAKIT: item.LINEAKIT,
-            REFERENCIA: item.REFERENCIA,
-            UDSELABORACION: item.UDSELABORACION,
-            ULTIMOCOSTE: item.ULTIMOCOSTE,
-            UNIDADES: ((item.UNIDADES / item.UDSELABORACION) * unidades),
-            UNIDADMEDIDA: item.UNIDADMEDIDA,
-            USASTOCKS: item.USASTOCKS
-          }
-          );
-        return this.storage.set(ITEMS_KITS, [val]);
+        return this.storage.set(ITEMS_KITS, [item]);
       }
     });
   }
 
-
-  async addItem(obj: any) {
-    const data = await this.storage.get(ITEMS_KITS);
-    console.log('DATA de get(ITEMS_KITS) : ' + JSON.stringify(data));
-    if (data) {
-      console.log('OBJ : ' + obj);
-      data.push(obj);
-      console.log('DATA en AddItem : ' + JSON.stringify(data));
-      const a = await this.storage.set(ITEMS_KITS, data);
-      console.log('VALOR A : ' + a );
-    } else {
-      const b = await this.storage.set(ITEMS_KITS, [obj]);
-      console.log('VALOR B : ' + b );
-    }
-  }
+ GetArticulos() {
+  this.storage.get(ITEMS_KITS).then((data) => {
+    console.log('GetArticulos()');
+    console.log(JSON.stringify(data));
+  });
+  this.storage.keys().then((data) => {
+    console.log('DATA KEYS : ' + JSON.stringify(data));
+  });
+}
 
   getItems() {
     return this.storage.get(ITEMS_KITS);
@@ -143,6 +124,7 @@ export class KitsService {
     let data: any[] = [];
     console.log('Actualizar Articulos');
     console.log(obj);
+    console.log('Unidades : ' + unidades);
     obj.forEach(a => {
       const b = ({
         CODARTKIT: a.CODARTKIT,
@@ -167,17 +149,16 @@ export class KitsService {
     const resultados = await this.ActualizaArticulos(data.values, unidades);
     console.log('Resultados Actualizar');
     console.log(resultados);
-    console.log('Data Obtenida de sql.GetPtsComponentes :' + JSON.stringify(data));
-    if (data.values.length > 0) {
-      for (let i = 0; i < data.values.length; i++) {
-        console.log('VALOR : ' + i  + ' : ' + JSON.stringify(data.values[i]));
-        if (data.values[i].ESKIT === 'F') {
-          await this.Add_Articulos(data.values[i], data.values[i].UNIDADES).then((val) => {
+    if (resultados.length > 0) {
+      for (let i = 0; i < resultados.length; i++) {
+        console.log('VALOR : ' + i  + ' : ' + JSON.stringify(resultados[i]));
+        if (resultados[i].ESKIT === 'F') {
+          await this.Add_Articulos(resultados[i], resultados[i].UNIDADES).then((val) => {
             console.log('RESULTADO INSERT : ' + val);
           });
         } else {
-          console.log(data.values[i].CODARTKIT + ' ES UN ARTICULO CON KIT ');
-          await this.GetComponentes(data.values[i].CODARTKIT, data.values[i], unidades = data.values[i].UNIDADES);
+          console.log(resultados[i].CODARTKIT + ' ES UN ARTICULO CON KIT ');
+          await this.GetComponentes(resultados[i].CODARTKIT, resultados[i], unidades = resultados[i].UNIDADES);
         }
       }
     } else {
@@ -186,45 +167,75 @@ export class KitsService {
         console.log('RESULTADO INSERT NO : ' + val);
       });
     }
-    /*
-    if (data.values.length > 0 ) {
-      data.values.forEach(async a => {
-        if (a.ESKIT === 'F') {
-          console.log('INSERTANDO en AddItem() ' + a.CODARTKIT);
-          const result = await this.Add_Articulos(a);
-          console.log('VAL ITEM : ' + result);
-        } else {
-          console.log(a.CODARTKIT + ' ES UN ARTICULO CON KIT ');
-        }
-      });
-    } else {
-      console.log('INSERTANDO en AddItem() ' + obj);
-    }
-    */
   }
 
-  /*async GetComponentes(codarticulo: number, item: any = null): Promise<any> {
-      console.log('DATO A OBTENER EN GETCOMPONENTES : ' + codarticulo);
-      const data: any = await this.sql.GetPtsComponentes(codarticulo);
-      console.log('VALOR DE sql.GetPtsComponentes: ' + JSON.stringify(data) + ' Del Articulo : ' + codarticulo);
-      console.log(data);
-      if (data.values.length > 0) {
-        await data.values.forEach(async (a: any) => {
-          if (a.ESKIT === 'F') {
-            console.log('INSERTANDO en addItem() ' + a.CODARTKIT);
-            const val_item: any = await this.AddArticulos(a);
-            console.log('DATA DESDE ADD_ITEM() : ' + JSON.stringify(val_item));
+ dedup_and_sum(arr: any) {
+  let map = arr.reduce((prev, next) => {
+    if(next.CODARTKIT in prev) {
+      prev[next.CODARTKIT].UNIDADES += next.UNIDADES;
+    } else {
+      prev[next.CODARTKIT] = next;
+    }
+    return prev;
+  }, {});
+  return Object.keys(map).map(CODARTKIT => map[CODARTKIT]);
+}
+
+  DuplicateItemSum(obj: any) {
+    let sum = {};
+    obj.forEach(a => {
+      sum[a.CODARTKIT] = sum[a.CODARTKIT] ?
+          { CODARTKIT: a.CODARTKIT, UNIDADES:  sum[a.CODARTKIT].UNIDADES + Number(a.UNIDADES)} :
+          { CODARTKIT: a.CODARTKIT, UNIDADES: Number(a.UNIDADES)}
+    });
+    return sum;
+  }
+
+  SetDataPt(obj: any) {
+    return new Promise((resolve, reject) => {
+      this.storage.ready().then((data) => {
+        // console.log('ARTICULOS :' + obj[0].articulos);
+        this.storage.set('PT_KITS', JSON.stringify(
+          {
+            pt_item : obj
           }
-          else {
-            console.log(a.CODARTKIT + ' ES UN ARTICULO CON KIT ');
-            const data: any = await this.GetComponentes(a.CODARTKIT, a);
-          }
-        });
-      } else {
-        console.log('DEBE AGREGARSE EL ARTICULO CUANDO ESTA VACIO');
-        const val_item = await this.AddArticulos(item);
+          ));
+        resolve({value: true, values: data});
+      }).catch((error) => {
+        reject({value: false, values: error});
+      });
+    });
+  }
+
+  RemoveStorage() {
+    return new Promise((resolve, reject) => {
+      this.storage.keys().then((data) => {
+        console.log('DATA KEYS : ' + JSON.stringify(data));
+      });
+      this.storage.remove('PT_KITS').then((data) => {
+        console.log('Datos del Remove PT_KITS : ' + JSON.parse(data));
+        resolve({ value: true, values: data });
+      }).catch((error) => {
+        console.log('Error del remove PT_KITS : ' + JSON.stringify(error));
+        reject({ value: false, values: error });
+      });
+    });
+  }
+
+  ActualizaDuplicados(obj: any) {
+    let result: any[] = [];
+    obj.forEach(a => {
+      if (!a.CODARTKIT) {
+        a.CODARTKIT = {
+          CODARTKIT: a.CODARTKIT,
+          UNIDADES: 0
+        };
+        result.push(a.CODARTKIT);
       }
-  }*/
+      a.CODARTKIT.UNIDADES += a.UNIDADES;
+    }, Object.create(null));
+    console.log(result);
+  }
 
   updateItem(item: any): Promise<any> {
     return this.storage.get(ITEMS_KITS).then((data: any) => {
@@ -268,44 +279,4 @@ export class KitsService {
       return this.storage.set(ITEMS_KITS, toKeep);
     });
   }
-  /*
-  GetComponentes(codarticulo: number): Promise<any> {
-    console.log('DATO A OBTENER EN GETCOMPONENTES : ' + codarticulo );
-    return this.sql.GetPtsComponentes(codarticulo).then((data: any) => {
-      console.log('VALOR DE sql.GetPtsComponentes: ' + JSON.stringify(data) + ' Del Articulo : ' + codarticulo);
-      if (data.value) {
-        data.values.forEach(a => {
-          if (a.ESKIT === 'F') {
-            this.addItem(a);
-          } else {
-            console.log(a.CODARTKIT + ' ES UN KIT ');
-            this.sql.IsPt(a.CODARTKIT).then((data2: any) => {
-              console.log('VALOR DE IsPt : ' + JSON.stringify(data2));
-              if (data2.value) {
-                console.log('Entra a Obtener sus subcomponentes : ' + a.CODARTKIT);
-                this.GetComponentes(a.CODARTKIT).then((data3) => {
-                  console.log('VALOR DE DATA3 ' + JSON.stringify(data3));
-                  if (!data3 || data3 === null || data3 === undefined) {
-                    this.addItem(a);
-                  } else {
-                    this.addItem(a);
-                  }
-                });
-              } else {
-                this.addItem(a);
-              }
-            }).catch((error) => {
-              this.addItem(a);
-              console.log('VALOR DE Q : ' + JSON.stringify(error));
-            });
-          }
-        });
-        //return null;
-      } /* else {
-        return this.getItems();
-      }
-    });
-  }
-  */
-
 }

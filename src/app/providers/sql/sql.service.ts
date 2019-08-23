@@ -49,7 +49,7 @@ export class SqlService {
           reject({ value: false, values: error });
         });
     });
-  } 
+  }
 
   GetPts() {
     return new Promise((resolve, reject) => {
@@ -62,6 +62,22 @@ export class SqlService {
         reject({value: false, values: error});
       });
     });
+  }
+
+  GetDuplicados(obj: any) {
+    let _DB = this.data._DB;
+    let q  = 'SELECT CODARTKIT, SUM(UNIDADES) AS UNIDADES FROM ? GROUP BY CODARTKIT';
+    return _DB
+        .executeSql(q, [obj])
+        .then(response => {
+          let tasks = [];
+          // console.log("Data : " + JSON.stringify(response));
+          for (let index = 0; index < response.rows.length; index++) {
+            tasks.push(response.rows.item(index));
+          }
+          return Promise.resolve(tasks);
+        })
+        .catch(error => Promise.reject(error));
   }
 
   getRegularizacion(codalmacen: string, fecha: string) {
@@ -90,11 +106,9 @@ export class SqlService {
       console.log('Entrando a GetArticulosInventario : ' + q);
       this.data.GetDataScript(q)
       .then((respon) => {
-        // console.log('Respuesta de GetDataScript SQL SERVICE : ' + JSON.stringify(respon));
         resolve(respon);
       })
-      .catch((error) =>{
-        // console.log('Error de GetDataScript SQL SERVICE : ' + JSON.stringify(error));
+      .catch((error) => {
         reject(error);
       });
     });

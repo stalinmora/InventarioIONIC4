@@ -34,19 +34,6 @@ export class AdicionarPtPage implements OnInit {
       });
     }
   ngOnInit() {
-    /*
-    if (this.articulos === undefined || this.articulos === null) {
-      this.CargaDatosPTS().then((data) => {
-        console.log('DATA CARGADA CORRECTAMENTE');
-        console.log('VALOR DE ARTICULOS: ' + JSON.stringify(this.articulos));
-      }).catch((error) => {
-        console.log('ERROR CARGANDO DATOS');
-        console.log(JSON.stringify(error));
-      });
-    } else {
-      console.log('DATA ENCONTRADA');
-    }
-    */
   }
 
   GetPTStorage() {
@@ -95,12 +82,11 @@ export class AdicionarPtPage implements OnInit {
     });
   }
 
-  btnCargar() {
-    //this.CargaDatosPTS();
+  async btnCargar() {
+    this.CargaDatosPTS();
     console.log('BTNCARGAR()');
-    this.kit.getItems().then((data) => {
-      console.log('DATA BTNCARGAR() : ' + JSON.stringify(data));
-    });
+    const b = await this.kit.getItems();
+    console.log('DATA BTNCARGAR() : ' + JSON.stringify(b));
   }
 
   btnDelete() {
@@ -127,10 +113,29 @@ export class AdicionarPtPage implements OnInit {
   async Calcular(dato: any) {
     console.log('Datos : ' + JSON.stringify(dato.CODARTICULO));
     const a = await this.kit.GetComponentes(dato.CODARTICULO);
-    this.kit.getItems().then((data) => {
-      console.log('Valores de GetItems : ' + JSON.stringify(data));
+    const b = await this.kit.getItems();
+    console.log('VALOR DE B : ');
+    console.log(b);
+    b.forEach(a => {
+      b.find(v => v.CODARTKIT == a.CODARTKIT).UNIDADES = a.UNIDADES * dato.UNIDADES;
+      console.log('DATA CALCULADA DE : ' + a.CODARTKIT + ' UNIDADES : ' + a.UNIDADES);
     });
+    console.log('VALOR DE B ACTUALIZADA : ');
+    console.log(b);
+    console.log('Tipo de Dato : ' + typeof(b));
+    const t = await this.kit.SetArticulosKits(b);
+    const f = await this.kit.DuplicateItemSum(b);
+    const g = await this.kit.dedup_and_sum(b);
+    this.kit.RemoveStorage().then((data) => {
+      console.log('Data Eliminada');
+    });
+    const i = await this.kit.SetDataPt(g);
+    console.log('SET ARTICULOS KITS : ' + JSON.stringify(i));
+    const [a_, b_, c_] = await Promise.all([a, b, i]);
+    console.log(a_, b_, c_);
   }
+
+
 
   async ShowMensaje(msg: string) {
     const toast = await this.Loading.create({

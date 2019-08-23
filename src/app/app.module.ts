@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouteReuseStrategy } from '@angular/router';
 
-import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
+import { IonicModule, IonicRouteStrategy, AlertController } from '@ionic/angular';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
 
@@ -19,8 +19,9 @@ import { SQLitePorter } from '@ionic-native/sqlite-porter/ngx';
 import { SQLite } from '@ionic-native/sqlite/ngx';
 import { SqliteDbCopy } from '@ionic-native/sqlite-db-copy/ngx';
 import { SqlService } from './providers/sql/sql.service';
-import { DatePipe } from '@angular/common'
+import { DatePipe } from '@angular/common';
 import { PipesModule } from './pipes/pipes.module';
+import { File } from '@ionic-native/file/ngx';
 
 @NgModule({
   declarations: [AppComponent],
@@ -30,8 +31,8 @@ import { PipesModule } from './pipes/pipes.module';
     StatusBar,
     SplashScreen,
     SqliteDbCopy,
-    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }, ConexionService, HttpClient, DataLocalService, DatabaseService, DatePipe,
-    SqlService, SQLitePorter, SQLite
+    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }, AlertController, ConexionService, HttpClient, DataLocalService, DatabaseService, DatePipe,
+    SqlService, File, SQLitePorter, SQLite
   ],
   bootstrap: [AppComponent]
 })

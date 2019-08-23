@@ -20,7 +20,11 @@
 
 <ion-content>
   <ion-grid class="ion-2x">
-    <ion-row style="border-bottom: 0.5px solid gray;">
+    <ion-row style="position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;">
       <ion-col size="8">Descripcion</ion-col>
 
       <!-- <ion-col col-2 >Cod.</ion-col> -->
@@ -59,4 +63,14 @@
       loadingText="Loading more data..."
     ></ion-infinite-scroll-content>
   </ion-infinite-scroll>
+  
 </ion-content>
+<ion-footer>
+    <ion-toolbar>
+        <ion-button
+    expand="block"
+    color="primary"
+    routerLink="/final"
+  >Final</ion-button>
+    </ion-toolbar>
+  </ion-footer>

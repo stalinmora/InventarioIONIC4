@@ -1,15 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage';
 import { SqliteDbCopy } from '@ionic-native/sqlite-db-copy/ngx';
-import { query } from '@angular/core/src/render3';
 import { DatabaseService } from '../database/database.service';
+import { File } from '@ionic-native/file/ngx';
 
 @Injectable(
 )
 export class DataLocalService {
 
   private globales: any;
-  constructor(private storage: Storage, public dbcopy: SqliteDbCopy, public dbase: DatabaseService) {
+  constructor(private storage: Storage, public dbcopy: SqliteDbCopy, private file: File, public dbase: DatabaseService) {
     this.getDataSweet();
     this.dbcopy.copy('data.db', 0)
     .then((res) => {
@@ -35,7 +35,6 @@ export class DataLocalService {
   }
 
   SetComponentes(obj: any) {
-    
   }
 
   GetDataRegularizacion(page: any) {
@@ -50,7 +49,13 @@ export class DataLocalService {
 
   getDataSweet() {
     return new Promise((resolve, rejecct) => {
-      fetch('./assets/data/dataSweet.json').then(res => res.json())
+      this.file.checkFile(this.file.externalApplicationStorageDirectory, 'dataSweet.json').then (() => {
+        console.log('Archivo Encontrado');
+      });
+      //fetch(this.file.externalApplicationStorageDirectory + 'dataSweet.json')
+      console.log('ARCHIVO EN : ' + this.file.externalApplicationStorageDirectory);
+      this.file.readAsText(this.file.externalApplicationStorageDirectory, 'dataSweet.json')
+      .then(res => JSON.parse(res))
       .then(json => {
         this.globales = json;
         this.SetDataGlobal(this.globales);
