@@ -12,6 +12,7 @@ import { PagerService } from '../../providers/pager/pager.service';
 export class FinalPage implements OnInit {
 
   public articulos: any;
+  public articulos_new: any;
   public idEstablecimiento: any;
   public slice: number = 30;
 
@@ -78,6 +79,7 @@ export class FinalPage implements OnInit {
     this.storage.get('REGULARIZACION' + this.idEstablecimiento).then((data) => {
       const t = JSON.parse(data);
       this.articulos = t.regularizacion;
+      this.articulos_new = t.regularizacion;
       this.setPage(1);
       console.log(this.articulos);
       this.articulos.sort((a, b) => a.DESCRIPCION > b.DESCRIPCION);
@@ -92,6 +94,7 @@ export class FinalPage implements OnInit {
   }
 
   async actualizaFracciones() {
+    this.DeleteJSON('regularizacion.json');
     const a = await this.storage.get('PT_KITS');
     console.log('VALOR A : ');
     console.log(a);
@@ -102,16 +105,17 @@ export class FinalPage implements OnInit {
       console.log(b);
       b.forEach(c => {
         // tslint:disable-next-line: triple-equals
-        this.articulos.find(v => v.CODARTICULO == c.CODARTKIT).FRACCION = c.UNIDADES;
+        this.articulos_new.find(v => v.CODARTICULO == c.CODARTKIT).FRACCION = c.UNIDADES;
       });
     }
-    this.articulos.forEach(a => {
+    this.articulos_new.forEach(a => {
       const suma = a.FRACCION + a.ADICIO;
       if (a.FRACCION != 0) {
         console.log('VALOR DE A : ' + JSON.stringify(a));
       }
-      this.articulos.find(v => v.CODARTICULO == a.CODARTICULO).DIFER = (a.UNIDADES + suma) -  a.STOCK ;
+      this.articulos_new.find(v => v.CODARTICULO == a.CODARTICULO).DIFER = (a.UNIDADES + suma) -  a.STOCK ;
     });
+    this.articulos = this.articulos_new;
     console.log(this.articulos);
     this.writeJSON('regularizacion.json', this.articulos).then((data) => {
       console.log('Creacion de File : ');
@@ -122,6 +126,10 @@ export class FinalPage implements OnInit {
   writeJSON(filename, object) {
     return this.file.writeFile(this.file.externalApplicationStorageDirectory, filename, JSON.stringify(object), {replace: true});
     }
+
+  DeleteJSON(filename){
+    return this.file.removeFile(this.file.externalApplicationStorageDirectory, filename);
+  }
 
   GetParametros() {
     return new Promise((resolve, reject) => {

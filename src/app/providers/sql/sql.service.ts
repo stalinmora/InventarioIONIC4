@@ -82,7 +82,7 @@ export class SqlService {
 
   getRegularizacion(codalmacen: string, fecha: string) {
     return new Promise((resolve, reject) => {
-      let q = 'SELECT A.DESCRIPCION, ST.CODALMACEN, A.CODARTICULO,A.SECCION,\'.\' AS TALLA,\'.\' AS COLOR ,0 AS UNIDADES,0 AS STOCKFINAL, ST.STOCK,' ;
+      let q = 'SELECT A.DESCRIPCION, ST.CODALMACEN, A.CODARTICULO,A.SECCION,\'.\' AS TALLA,\'.\' AS COLOR ,0 AS UNIDADES,0 AS STOCKFINAL, ST.STOCK, A.UDSELABORACION, ' ;
       q = q + `0 AS FRACCION, 0 AS ADICIO, ST.STOCK AS DIFER, \'F\' AS CUADRADO ,A.ULTIMOCOSTE AS PRECIO, A.ULTIMOCOSTE AS PVP,1 AS CODMONEDAAPVP,\'${fecha}\' AS FECHA `;
       q = q + ` FROM ARTICULOS A LEFT JOIN STOCKS ST ON (A.CODARTICULO = ST.CODARTICULO) WHERE (ST.CODALMACEN=\'${codalmacen}\' OR ST.CODALMACEN IS NULL) AND A.USASTOCKS =\'T\'`;
       console.log('Entrando a GetArticulosInventario : ' + q);

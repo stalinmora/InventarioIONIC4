@@ -130,7 +130,7 @@ export class DatabaseService {
         .catch(error => {
           reject({ value: false, values: error});
         });
-      }, 4000);
+      }, 100);
     });
   }
 
@@ -188,7 +188,7 @@ export class DatabaseService {
         .catch(error => {
           reject({ value: false, values: error});
         });
-      }, 4000);
+      }, 100);
     });
   }
 
@@ -230,13 +230,13 @@ export class DatabaseService {
         this._DB
         .executeSql(sql, [])
         .then(response => {
-          console.log('Creando la tabla KITS : ' + JSON.stringify(response));
+          console.log('Tabla KITS creada : ' + JSON.stringify(response));
           resolve({value: true, values: response});
         })
         .catch(error => {
           reject({ value: false, values: error});
         });
-      }, 4000);
+      }, 100);
     });
   }
 
@@ -282,7 +282,7 @@ export class DatabaseService {
         .catch(error => {
           reject({ value: false, values: error});
         });
-      }, 4000);
+      }, 100);
     });
   }
 

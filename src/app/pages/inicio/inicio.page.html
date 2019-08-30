@@ -65,7 +65,7 @@
   </ion-item>
 
 <ion-content class="ion-1x;centrar_content">
-  <ion-grid class="ion-2x">
+  <ion-grid class="ion-1x">
     <ion-row style="position: sticky;
     top: 0;
     left: 0;
@@ -76,7 +76,7 @@
       <!-- <ion-col col-2 >Cod.</ion-col> -->
 
       <ion-col>Unid.</ion-col>
-
+      <ion-col>Frac.</ion-col>
       <ion-col>Stock</ion-col>
 
       <ion-col>Difer</ion-col>
@@ -92,13 +92,23 @@
               {{dato.orden}}
           </ion-col> -->
 
-      <ion-col class="ion-2x">
+      <ion-col class="ion-1x">
         <ion-input
           text-ri="text-ri"
           type="number"
           color="primary"
           [(ngModel)]="dato.UNIDADES"
           (change)="Calcular(dato)"
+        ></ion-input>
+      </ion-col>
+
+      <ion-col class="ion-1x">
+        <ion-input
+          text-ri="text-ri"
+          type="number"
+          color="primary"
+          [(ngModel)]="dato.FRACCION"
+          (change)="Calcular(dato,1)"
         ></ion-input>
       </ion-col>
 

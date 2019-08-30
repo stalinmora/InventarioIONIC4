@@ -62,15 +62,22 @@ export class InicioPage implements OnInit {
     this.myGroup = new FormGroup({
       datetime: new FormControl('', [Validators.required]),
     });
-    // setTimeout(() => {
-    this.databaseService.init().then((data: any) => {
+    this.Inicio().then(() => {
+      console.log('Carga Exitosa');
+     }).catch((error) => {
+       console.log('Error de carga : ' +JSON.parse(error) );
+     });
+  }
+
+  async Inicio() {
+    await this.databaseService.init().then((data: any) => {
       console.log('Retorno de INIT() : ' + JSON.stringify(data.value));
       this.CargarDatos().then(() => {
         console.log('data cargada');
       });
     });
     // }, 4000);
-    this.GetParametros().then((data: any) => {
+    await this.GetParametros().then((data: any) => {
       if (data.value == true) {
         console.log('PARAMETROS ENCONTRADOS');
       }
@@ -94,7 +101,7 @@ export class InicioPage implements OnInit {
           }).catch((error) => {
             reject({ value: false, values: error });
           });
-        }, 5000);
+        }, 500);
       }
     });
   }
@@ -156,7 +163,7 @@ export class InicioPage implements OnInit {
             .catch((error) => {
               reject(error);
             });
-        }, this.timeoutTime + 10000);
+        }, this.timeoutTime + 1000);
       });
     });
   }
@@ -180,8 +187,10 @@ export class InicioPage implements OnInit {
           handler: () => {
             this.storage.remove('REGULARIZACION' + this.idEstablecimiento).then((data) => {
               console.log('Eliminando Regularizacion : ' + JSON.stringify(data));
+              this.articulos3 = null;
             }).catch((error) => {
               console.log('Error eliminando : ' + JSON.stringify(error));
+              this.articulos3 = null;
             });
             this.storage.remove('PARAM').then((data) => {
               console.log('Eliminando Regularizacion : ' + JSON.stringify(data));
@@ -230,7 +239,7 @@ export class InicioPage implements OnInit {
             .catch((error) => {
               reject(error);
             });
-        }, this.timeoutTime + 10000);
+        }, this.timeoutTime + 1000);
       });
     });
   }
@@ -351,7 +360,10 @@ export class InicioPage implements OnInit {
     });
   }
 
-  Calcular(dato: any) {
+  Calcular(dato: any, opc: any) {
+    if (opc === 1) {
+      dato.FRACCION = dato.FRACCION / dato.UDSELABORACION;
+    }
     this.flag = true;
     //dato.UNIDADES = dato.UNIDADES + 2;
     const suma = dato.FRACCION + dato.ADICIO;
